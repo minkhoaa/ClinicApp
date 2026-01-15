@@ -266,3 +266,81 @@ export const createBooking = async (
     const response = await api.post('/api/appointments', data);
     return response as unknown as IBackendRes<CreateBookingResponse>;
 };
+
+// ==================== NEW: Appointment Detail ====================
+
+export interface AppointmentDetailDto {
+    id: string;
+    title: string;
+    doctor: string;
+    doctorId: string;
+    clinic: string;
+    clinicId: string;
+    service: string;
+    serviceId: string;
+    startAt: string;
+    endAt: string;
+    duration: number;
+    note: string | null;
+    status: AppointmentStatus;
+    createdAt: string;
+}
+
+export const getAppointmentDetail = async (
+    id: string
+): Promise<IBackendRes<AppointmentDetailDto>> => {
+    const response = await api.get(`/api/patient/appointments/${id}`);
+    return response as unknown as IBackendRes<AppointmentDetailDto>;
+};
+
+// ==================== NEW: Gender Enum ====================
+
+export interface EnumDto {
+    value: number;
+    name: string;
+}
+
+export const getGenderEnum = async (): Promise<IBackendRes<EnumDto[]>> => {
+    const response = await api.get('/api/enums/gender');
+    return response as unknown as IBackendRes<EnumDto[]>;
+};
+
+// ==================== NEW: Download Attachment ====================
+
+export const downloadMedicalRecordAttachment = async (
+    recordId: string,
+    attachmentId: string
+): Promise<{ data: ArrayBuffer; fileName: string }> => {
+    const response = await api.get(
+        `/api/patient/medical-records/${recordId}/attachments/${attachmentId}`,
+        { responseType: 'blob' }
+    );
+    // Return the blob data
+    return {
+        data: response as unknown as ArrayBuffer,
+        fileName: `attachment_${attachmentId}`,
+    };
+};
+
+// ==================== NEW: Review ====================
+
+export interface CreateReviewRequest {
+    appointmentId: string;
+    rating: number;
+    comment?: string | null;
+}
+
+export interface ReviewDto {
+    reviewId: string;
+    appointmentId: string;
+    rating: number;
+    comment: string | null;
+    createdAt: string;
+}
+
+export const createReview = async (
+    data: CreateReviewRequest
+): Promise<IBackendRes<ReviewDto>> => {
+    const response = await api.post('/api/patient/reviews', data);
+    return response as unknown as IBackendRes<ReviewDto>;
+};

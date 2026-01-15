@@ -15,7 +15,7 @@ import { clearAuthData, getToken } from './storage';
  *
  * Check your IP with: hostname -I (Linux) or ipconfig (Windows)
  */
-const BACKEND_URL = 'http://192.168.1.20:5000';
+const BACKEND_URL = 'http://192.168.1.24:5000';
 
 // Create axios instance
 const api: AxiosInstance = axios.create({

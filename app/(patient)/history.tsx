@@ -5,10 +5,13 @@ import {
     MedicalRecordDto,
 } from '@/services/apiPatient';
 import { Ionicons } from '@expo/vector-icons';
+import * as FileSystem from 'expo-file-system';
 import { useFocusEffect } from 'expo-router';
+import * as Sharing from 'expo-sharing';
 import React, { useCallback, useState } from 'react';
 import {
     ActivityIndicator,
+    Alert,
     FlatList,
     Modal,
     RefreshControl,
@@ -29,6 +32,7 @@ export default function MedicalHistoryScreen() {
     const [selectedRecord, setSelectedRecord] =
         useState<MedicalRecordDetailDto | null>(null);
     const [loadingDetail, setLoadingDetail] = useState(false);
+    const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
     const fetchRecords = async () => {
         try {
@@ -81,6 +85,57 @@ export default function MedicalHistoryScreen() {
         if (bytes < 1024) return bytes + ' B';
         if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
         return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+    };
+
+    const handleDownload = async (
+        recordId: string,
+        attachmentId: string,
+        fileName: string
+    ) => {
+        setDownloadingId(attachmentId);
+        try {
+            // Build the download URL
+            const baseUrl = 'http://192.168.1.24:5000'; // Match api.ts
+            const downloadUrl = `${baseUrl}/api/patient/medical-records/${recordId}/attachments/${attachmentId}`;
+
+            // Get available cache directory
+            // @ts-ignore - Legacy API still works at runtime in SDK 54
+            const cacheDir = FileSystem.cacheDirectory;
+            if (!cacheDir) {
+                throw new Error('Cache directory not available');
+            }
+            const fileUri = cacheDir + fileName;
+
+            // Download using legacy API
+            // @ts-ignore - Legacy API still works at runtime in SDK 54
+            const downloadResumable = FileSystem.createDownloadResumable(
+                downloadUrl,
+                fileUri,
+                {}
+            );
+
+            const result = await downloadResumable.downloadAsync();
+
+            if (result && result.uri) {
+                // Share the file
+                const isAvailable = await Sharing.isAvailableAsync();
+                if (isAvailable) {
+                    await Sharing.shareAsync(result.uri, {
+                        mimeType: 'application/octet-stream',
+                        dialogTitle: `Chia sẻ ${fileName}`,
+                    });
+                } else {
+                    Alert.alert('Thành công', `Đã tải: ${fileName}`);
+                }
+            } else {
+                throw new Error('Download failed');
+            }
+        } catch (error) {
+            console.error('Download error:', error);
+            Alert.alert('Lỗi', 'Không thể tải file. Vui lòng thử lại.');
+        } finally {
+            setDownloadingId(null);
+        }
     };
 
     const renderRecord = ({ item }: { item: MedicalRecordDto }) => (
@@ -243,10 +298,21 @@ export default function MedicalHistoryScreen() {
                                         </Text>
                                         {selectedRecord.attachments.map(
                                             (attachment) => (
-                                                <View
+                                                <TouchableOpacity
                                                     key={attachment.id}
                                                     style={
                                                         styles.attachmentItem
+                                                    }
+                                                    onPress={() =>
+                                                        handleDownload(
+                                                            selectedRecord.id,
+                                                            attachment.id,
+                                                            attachment.fileName
+                                                        )
+                                                    }
+                                                    disabled={
+                                                        downloadingId ===
+                                                        attachment.id
                                                     }
                                                 >
                                                     <Ionicons
@@ -279,7 +345,20 @@ export default function MedicalHistoryScreen() {
                                                             )}
                                                         </Text>
                                                     </View>
-                                                </View>
+                                                    {downloadingId ===
+                                                    attachment.id ? (
+                                                        <ActivityIndicator
+                                                            size="small"
+                                                            color="#2563EB"
+                                                        />
+                                                    ) : (
+                                                        <Ionicons
+                                                            name="download-outline"
+                                                            size={22}
+                                                            color="#2563EB"
+                                                        />
+                                                    )}
+                                                </TouchableOpacity>
                                             )
                                         )}
                                     </View>

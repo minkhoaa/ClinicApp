@@ -1,50 +1,103 @@
-# Welcome to your Expo app 👋
+# ClinicApp
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+![Platform](https://img.shields.io/badge/platform-iOS%20%7C%20Android-black?style=for-the-badge)
+![TypeScript](https://img.shields.io/badge/TypeScript-black?style=for-the-badge&logo=typescript)
+![Expo](https://img.shields.io/badge/Expo-black?style=for-the-badge&logo=expo)
+![React Native](https://img.shields.io/badge/React%20Native-black?style=for-the-badge&logo=react)
 
-## Get started
+A cross-platform mobile application for clinic appointment management, built with Expo and React Native. Patients can register, book appointments, view medical history, and manage their health profile — all from a single app on iOS and Android.
 
-1. Install dependencies
+---
 
-   ```bash
-   npm install
-   ```
+## Features
 
-2. Start the app
+- **Authentication** — Secure JWT-based login and registration with token persistence via Expo SecureStore
+- **Appointment Booking** — Browse available clinic services and time slots, then book appointments with real-time status tracking (pending, confirmed, completed, cancelled, no-show)
+- **Medical History** — Access full medical records including diagnoses, treatment notes, prescriptions, and file attachments
+- **Patient Profile** — Manage personal details, emergency contacts, blood group, insurance information, and allergy/chronic disease records
+- **Appointment Management** — Cancel upcoming appointments and submit star ratings with written reviews after completed visits
+- **Dark / Light Mode** — Automatic system-level theme support
 
-   ```bash
-   npx expo start
-   ```
+---
 
-In the output, you'll find options to open the app in a
+## Tech Stack
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+| Layer | Technology |
+|---|---|
+| Framework | Expo SDK 54, React Native 0.81 |
+| Language | TypeScript 5.9 |
+| Navigation | Expo Router (file-based), React Navigation (Drawer + Bottom Tabs) |
+| HTTP Client | Axios with request/response interceptors |
+| Storage | Expo SecureStore (tokens), AsyncStorage (general) |
+| UI | Custom components, Expo Vector Icons |
+| Animation | React Native Reanimated 4, Gesture Handler |
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+---
 
-## Get a fresh project
+## Project Structure
 
-When you're ready, run:
-
-```bash
-npm run reset-project
+```
+app/
+  (auth)/          # Login screen and auth layout
+  (patient)/       # Patient drawer: dashboard, appointments, history, profile
+  booking.tsx      # Appointment booking flow
+  index.tsx        # Entry redirect
+services/
+  api.ts           # Axios instance with auth interceptors
+  apiPatient.ts    # Patient-specific API calls (appointments, records, profile)
+  auth.ts          # Authentication API calls
+  storage.ts       # Token storage helpers
+context/
+  AuthContext.tsx  # Global auth state and user session
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+---
 
-## Learn more
+## Getting Started
 
-To learn more about developing your project with Expo, look at the following resources:
+### Prerequisites
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+- Node.js 18+
+- Expo CLI (`npm install -g expo-cli`)
+- iOS Simulator (macOS) or Android Emulator, or a physical device with the Expo Go app
 
-## Join the community
+### Installation
 
-Join our community of developers creating universal apps.
+```bash
+git clone https://github.com/minkhoaa/ClinicApp.git
+cd ClinicApp
+npm install
+```
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+### Configure Backend URL
+
+Open `services/api.ts` and update `BACKEND_URL` to point to your backend server:
+
+```ts
+// Android Emulator:  http://10.0.2.2:5000
+// iOS Simulator:     http://localhost:5000
+// Physical device:   http://<your-local-ip>:5000
+const BACKEND_URL = 'http://192.168.1.24:5000';
+```
+
+### Run
+
+```bash
+# Start Expo development server
+npm start
+
+# Run on Android
+npm run android
+
+# Run on iOS
+npm run ios
+
+# Run in browser
+npm run web
+```
+
+---
+
+## License
+
+This project is for educational and personal use.
